@@ -1,7 +1,12 @@
 <template>
-  <div class="home">
+  <div class="products-new">
      <h1>New Product</h1>
-    <div>
+
+     <ul>
+       <li v-for="error in errors">{{ error }}</li>
+     </ul>
+
+      <form v-on:submit.prevent="submit()">
       <div>
         Name: <input v-model="newProductName">
       </div>
@@ -14,24 +19,13 @@
        <div>
         Image URL: <input v-model="newProductImageUrl">
       </div>
-      <button v-on:click="createProduct()">Create</button>
-    </div>
-
-
-    <h1>All Products</h1>
-    <div v-for="product in products">
-      <h2>{{ product.name }}</h2>
-      <img v-bind:src="product.image_url" v-bind:alt="product.name">
-      <p>Price: {{ product.formatted.price }}</p>
-    </div>
+      
+      <input type="submit" value="create" class="btn btn-warning">
+    </form>
   </div>
 </template>
 
-<style> 
-/*this is where the CSS goes*/
-  img {
-    width: 350px;
-  }
+<style>
 </style>
 
 <script>
@@ -40,22 +34,16 @@
 export default {
   data: function() {
     return {
-      products:[], 
       newProductName:"",
       newProductPrice:"",
       newProductDescription:"",
-      newProductImageUrl:""
+      newProductImageUrl:"",
+      errors: []
     };
   },
-  created: function() {
-    axios.get("/api/products")
-      .then(response => { 
-        this.products = response.data;  //.data just is pulling out the JSON core from the response (response is meta information and JSON body)...this is unlike http gem where .parse then converts it to Ruby array of hashes.
-         //This is redefining the products array here with the index JSON from the api
-      });
-  },
+  created: function() {},
   methods: {
-    createProduct: function() {
+    submit: function() {
       console.log("Create the Product...");
        var params = {
                     name: this.newProductName,
@@ -66,7 +54,9 @@ export default {
       axios.post("/api/products", params)
         .then(response => {
           console.log("Success", response.data);
-          this.products.push(response.data);
+          this.$router.push("/");
+        }).catch(error => {
+          this.errors = error.response.data.errors;
         });
     }
   }
